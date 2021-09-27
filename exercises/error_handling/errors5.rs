@@ -7,9 +7,30 @@
 use std::error;
 use std::fmt;
 use std::num::ParseIntError;
-
+#[derive(PartialEq, Debug)]
+enum CreationError {
+    Negative,
+    Zero,
+}
 // TODO: update the return type of `main()` to make this compile.
-fn main() -> Result<(), Box<dyn error::Error>> {
+#[derive(PartialEq, Debug)]
+enum GenericError {
+    ParseInt(ParseIntError),
+    Creation(CreationError),
+}
+
+impl From<ParseIntError> for GenericError {
+    fn from(e: ParseIntError) -> Self {
+        GenericError::ParseInt(e)
+    }
+}
+
+impl From<CreationError> for GenericError {
+    fn from(e: CreationError) -> Self {
+        GenericError::Creation(e)
+    }
+}
+fn main() -> Result<(), GenericError> {
     let pretend_user_input = "42";
     let x: i64 = pretend_user_input.parse()?;
     println!("output={:?}", PositiveNonzeroInteger::new(x)?);
@@ -20,12 +41,6 @@ fn main() -> Result<(), Box<dyn error::Error>> {
 
 #[derive(PartialEq, Debug)]
 struct PositiveNonzeroInteger(u64);
-
-#[derive(PartialEq, Debug)]
-enum CreationError {
-    Negative,
-    Zero,
-}
 
 impl PositiveNonzeroInteger {
     fn new(value: i64) -> Result<PositiveNonzeroInteger, CreationError> {
